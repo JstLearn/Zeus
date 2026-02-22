@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jarvis Control Panel V2</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #111827;
+      --line: #243244;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+    }
+
+    .top {
+      grid-column: 1 / -1;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 16px;
+      overflow: visible;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .subagent-metric {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 12px;
+      background: var(--panel);
+      margin-bottom: 10px;
+    }
+
+    .subagent-metric .count {
+      font-size: 16px;
+      font-weight: 700;
+      color: #67e8f9;
+    }
+
+    .subagent-metric .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .board {
+      padding: 12px;
+      overflow: auto;
+    }
+
+    .accounts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 8px;
+    }
+
+    .account {
+      flex: 1 1 360px;
+      min-width: 300px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: var(--panel);
+    }
+
+    .account small {
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #1f2a3d;
+      padding: 4px 6px;
+      text-align: left;
+    }
+
+    .project {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .project>summary {
+      cursor: pointer;
+      padding: 8px;
+      list-style: none;
+    }
+
+    .project>summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .project-name {
+      font-weight: 600;
+    }
+
+    .services {
+      padding: 0 8px 8px 18px;
+      color: var(--muted);
+    }
+
+    .svc {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      padding: 3px 0;
+      cursor: pointer;
+    }
+
+    .svc.running {
+      color: #22c55e;
+    }
+
+    .svc.stopped {
+      color: #ef4444;
+    }
+
+    .svc.active,
+    .project-select.active {
+      color: #67e8f9;
+      font-weight: 600;
+    }
+
+    .project-select {
+      background: transparent;
+      border: 0;
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      padding: 0;
+    }
+
+    .container {
+      margin-left: 14px;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .scope {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(240px, 1fr));
+      gap: 10px;
+      min-height: calc(100vh - 150px);
+    }
+
+    .col {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #0f172a;
+      padding: 8px;
+    }
+
+    .col h3 {
+      margin: 4px 2px 8px;
+      font-size: 14px;
+    }
+
+    .dropzone {
+      min-height: 180px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid #2c3b4f;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 8px;
+      cursor: grab;
+    }
+
+    .card.locked {
+      cursor: not-allowed;
+      opacity: .9;
+      border-style: dashed;
+    }
+
+    .card p {
+      margin: 6px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .badge {
+      font-size: 11px;
+      color: #67e8f9;
+    }
+
+    .watcher-live {
+      margin-top: 6px;
+      padding: 6px;
+      border: 1px solid #1f2a3d;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+
+    .watcher-live div {
+      margin: 2px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .watcher-run-summary {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #cbd5e1;
+      border-top: 1px dashed #223248;
+      padding-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .watcher-timeline {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .watcher-timeline li {
+      margin: 2px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn {
+      border: 1px solid #2563eb;
+      background: #1d4ed8;
+      color: #fff;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .btn.secondary {
+      background: #0f172a;
+      border-color: #334155;
+      color: #cbd5e1;
+    }
+
+    .card.suggestion-feature {
+      background: #052e16;
+      border-color: #16a34a;
+    }
+
+    .card.suggestion-bug {
+      background: #3f0d17;
+      border-color: #ef4444;
+    }
+
+    .card.suggestion-improvement {
+      background: #172554;
+      border-color: #3b82f6;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, .72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(860px, 96vw);
+      max-height: 90vh;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #0f172a;
+      padding: 16px;
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+    }
+
+    .modal-section {
+      border: 1px solid #1f2a3d;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .modal-section h4 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .inferred {
+      font-size: 11px;
+      color: #fbbf24;
+      margin-left: 8px;
+    }
+
+    .modal-close {
+      float: right;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <header class="top">
+      <div id="providerUsageTable" class="account"></div>
+    </header>
+    <aside class="sidebar">
+      <h3>Projeler / Servisler</h3>
+      <div id="subagentMetric" class="subagent-metric"></div>
+      <div id="projects"></div>
+    </aside>
+    <main class="board">
+      <div class="scope" id="scope"></div>
+      <div class="columns" id="columns"></div>
+    </main>
+  </div>
+
+  <div id="suggestionModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <button class="btn modal-close" id="modalCloseBtn">Kapat</button>
+      <h3 id="modalTitle"></h3>
+      <p id="modalMeta" class="badge"></p>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div id="prdModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" style="width:min(1000px, 98vw);">
+      <button class="btn modal-close" onclick="closePrdModal()">Kapat</button>
+      <h3 id="prdModalTitle">PRD Düzenle</h3>
+      <textarea id="prdTextArea"
+        style="width:100%; height:60vh; background:#0b1020; color:#e5e7eb; border:1px solid var(--line); border-radius:8px; padding:12px; font-family:monospace; margin-bottom:12px;"></textarea>
+      <button class="btn" id="savePrdBtn" style="width:100%;">Kaydet ve Kapat</button>
+    </div>
+  </div>
+
+  <script>
+    let currentEditingProjectId = null;
+
+    async function openPrdEditor(projectId) {
+      currentEditingProjectId = projectId;
+      const project = appState.projects.find(p => p.id === projectId);
+      document.getElementById('prdModalTitle').textContent = `${project.name} - PRD.md`;
+
+      const res = await fetch(`/api/v2/projects/${projectId}/prd`);
+      const data = await res.json();
+      document.getElementById('prdTextArea').value = data.content || '# PRD - ' + project.name;
+
+      document.getElementById('prdModal').classList.add('open');
+      document.getElementById('prdModal').setAttribute('aria-hidden', 'false');
+    }
+
+    function closePrdModal() {
+      document.getElementById('prdModal').classList.remove('open');
+      document.getElementById('prdModal').setAttribute('aria-hidden', 'true');
+    }
+
+    document.getElementById('savePrdBtn').onclick = async () => {
+      const content = document.getElementById('prdTextArea').value;
+      await fetch(`/api/v2/projects/${currentEditingProjectId}/prd`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+      });
+      closePrdModal();
+      resyncState();
+    };
+
+    const columns = [
+      ['izleyiciler', 'İzleyiciler'],
+      ['oneriler', 'Öneriler'],
+      ['gelistiriliyor', 'Geliştiriliyor'],
+      ['test', 'Test'],
+      ['kontrol', 'Kontrol'],
+      ['tamamlandi', 'Tamamlandı'],
+    ];
+
+    let appState = null;
+    let selected = { projectId: null, serviceId: null };
+    let watcherStepFilter = null; // running | idle | cooldown | unknown | null
+
+    function createColumns() {
+      const root = document.getElementById('columns');
+      root.innerHTML = columns.map(([id, label]) => `
+    <section class="col" data-col="${id}">
+      <h3>${label} <span class="badge" id="count-${id}"></span></h3>
+      <div class="dropzone" data-col="${id}"></div>
+    </section>
+  `).join('');
+    }
+
+    function cardMatchesScope(c) {
+      if (watcherStepFilter && c?.metaType === 'watcher') {
+        const step = (c?.liveStatus?.currentStep || 'unknown');
+        if (step !== watcherStepFilter) return false;
+      }
+      if (!selected.projectId) return true;
+      if (c.projectId !== selected.projectId) return false;
+      if (!selected.serviceId) return true;
+      return c.serviceId === selected.serviceId;
+    }
+
+    function selectedLabel() {
+      const watcherPart = watcherStepFilter ? ` · izleyici adımı: ${watcherStepFilter}` : '';
+      if (!selected.projectId) return `Kapsam: Tüm projeler ve servisler${watcherPart}`;
+      if (!selected.serviceId) return `Kapsam: Proje = ${selected.projectId}${watcherPart}`;
+      return `Kapsam: Proje/Servis = ${selected.projectId} / ${selected.serviceId}${watcherPart}`;
+    }
+
+    function setScope(projectId, serviceId = null) {
+      selected = { projectId, serviceId };
+      if (appState) render(appState);
+    }
+
+    function renderProjects(state) {
+      const projectsEl = document.getElementById('projects');
+      projectsEl.innerHTML = `
+    <div style="margin-bottom:8px">
+      <button class="svc ${!selected.projectId ? 'active' : ''}" data-scope-all>• Tümü</button>
+    </div>
+    ${(state.projects || []).map(p => `
+      <details class="project" open>
+        <summary>
+          <button class="project-select ${selected.projectId === p.id && !selected.serviceId ? 'active' : ''}" data-project="${p.id}">${p.name}</button>
+          <button class="btn secondary" style="padding:2px 4px; font-size:9px; margin-left:4px;" onclick="openPrdEditor('${p.id}')">PRD</button>
+        </summary>
+        <div class="services">
+          ${(p.services || []).map(s => {
+        const containers = Array.isArray(s.containers) ? s.containers : [];
+        const allRunning = containers.length > 0 && containers.every(c => String(c.state || '').toLowerCase() === 'running');
+        const svcStateClass = allRunning ? 'running' : 'stopped';
+        return `
+            <button class="svc ${svcStateClass} ${selected.projectId === p.id && selected.serviceId === s.id ? 'active' : ''}" data-project="${p.id}" data-service="${s.id}">• ${s.name} <small>(${containers.length})</small></button>
+          `;
+      }).join('') || '<div>Servis yok</div>'}
+        </div>
+      </details>
+    `).join('')}
+  `;
+
+      projectsEl.querySelector('[data-scope-all]')?.addEventListener('click', () => setScope(null, null));
+      projectsEl.querySelectorAll('[data-project]').forEach(btn => {
+        btn.addEventListener('click', () => setScope(btn.dataset.project, btn.dataset.service || null));
+      });
+    }
+
+    function shortModelName(model = '') {
+      const m = String(model || '');
+      if (!m) return 'unknown';
+      const parts = m.split('/');
+      return parts.length > 1 ? parts.slice(1).join('/') : m;
+    }
+
+    function runtimeBadge(c) {
+      const unknown = 'unknown (runtime not exposed)';
+      const meta = c.runtimeMeta || {};
+      const account = meta.account || unknown;
+      const model = meta.model || unknown;
+      const provider = meta.provider || unknown;
+      return `<div class="badge">runtime: ${account} · ${shortModelName(model)}${provider && provider !== unknown ? ` · ${provider}` : ''}</div>`;
+    }
+
+    function runMetric(card) {
+      const unknown = 'unknown (runtime not exposed)';
+      const run = card.lastRunMetrics || {};
+      return {
+        status: run.status || 'unknown',
+        duration: run.durationLabel || 'unknown',
+        model: shortModelName(run.model || card.runtimeMeta?.model || card.assignedModel || unknown),
+        account: run.account || card.runtimeMeta?.account || card.assignedAccount || unknown,
+        provider: run.provider || card.runtimeMeta?.provider || unknown,
+        startedAtIso: run.startedAtIso || null,
+        endedAtIso: run.endedAtIso || null,
+      };
+    }
+
+    function watcherRunSummaryHtml(card) {
+      const m = runMetric(card);
+      const when = m.endedAtIso ? new Date(m.endedAtIso).toLocaleTimeString('tr-TR') : 'henüz çalışmadı';
+      const status = m.status || 'unknown';
+      const duration = m.duration || 'unknown';
+      return `<div class="watcher-run-summary">Son çalışma: ${escapeHtml(status)} · ${escapeHtml(duration)} · ${escapeHtml(when)}</div>`;
+    }
+
+    function msRemaining(cooldownUntil) {
+      const until = Number(cooldownUntil || 0);
+      return Math.max(0, until - Date.now());
+    }
+
+    function formatRemaining(ms) {
+      if (!ms) return '0s';
+      const sec = Math.ceil(ms / 1000);
+      if (sec < 60) return `${sec}s`;
+      const min = Math.floor(sec / 60);
+      const rem = sec % 60;
+      return `${min}m ${rem}s`;
+    }
+
+    function watcherLiveStatusHtml(card) {
+      const ls = card.liveStatus || {};
+      const cooldown = formatRemaining(msRemaining(ls.cooldownUntil));
+      return `<div class="watcher-live">
+    <div>step: ${escapeHtml(ls.currentStep || 'idle')}</div>
+    <div>action: ${escapeHtml(ls.lastAction || '-')}</div>
+    <div>result: ${escapeHtml(ls.lastOutcome || '-')} ${ls.lastOutcomeAt ? `· ${new Date(ls.lastOutcomeAt).toLocaleTimeString('tr-TR')}` : ''}</div>
+    <div>next wait: ${escapeHtml(cooldown)}</div>
+  </div>`;
+    }
+
+    function watcherTimelineCompactHtml(card) {
+      const items = (card.timeline || []).slice(0, 3);
+      if (!items.length) return '<div class="watcher-timeline">history: henüz olay yok</div>';
+      return `<ul class="watcher-timeline">${items.map(it => `<li>${new Date(it.ts).toLocaleTimeString('tr-TR')} · ${escapeHtml(it.message || it.type || 'event')}</li>`).join('')}</ul>`;
+    }
+
+    function escapeHtml(text = '') {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function classifySuggestion(card) {
+      const combined = `${card.taskType || ''} ${card.signal || ''} ${card.title || ''} ${card.details || ''}`.toLowerCase();
+      if (/(bug|error|hata|issue|exception|crash|fail|failure|fix)/i.test(combined)) return 'bug';
+      if (/(improvement|iyileştirme|refactor|perf|performance|optimiz|cleanup|stabil)/i.test(combined)) return 'improvement';
+      if (/(new feature|yeni özellik|feature|ekle|add|capability)/i.test(combined)) return 'feature';
+      return 'improvement';
+    }
+
+    function suggestionClass(card, columnKey) {
+      if (columnKey !== 'oneriler') return '';
+      const type = classifySuggestion(card);
+      if (type === 'bug') return 'suggestion-bug';
+      if (type === 'feature') return 'suggestion-feature';
+      return 'suggestion-improvement';
+    }
+
+    function buildSuggestionNarrative(card) {
+      const title = card.title || 'Öneri';
+      const details = card.details || '';
+      const signal = card.signal || 'belirsiz sinyal';
+      const taskType = card.taskType || 'genel geliştirme';
+
+      const infer = (text) => ({ text: `Çıkarım: ${text}`, inferred: true });
+
+      const problem = details
+        ? { text: details, inferred: false }
+        : infer(`"${title}" başlığından hareketle sistemde ${signal} kaynaklı bir problem/eksik tespit edildi.`);
+
+      const reason = infer(`Bu ihtiyaç ${signal} sinyalinin tekrarlı görünmesi ve görev tipinin "${taskType}" olması nedeniyle oluştu.`);
+      const implementation = infer(`"${title}" için mevcut servislerde ${taskType} odaklı kod/gözlem düzenlemesi yapılarak ilgili akış güçlendirilecek.`);
+      const expected = infer(`Hata/sürtünme azalması, daha stabil çalışma ve ekip için daha hızlı operasyonel geri bildirim bekleniyor.`);
+
+      return {
+        problem,
+        reason,
+        implementation,
+        expected,
+      };
+    }
+
+    function openSuggestionModal(card) {
+      const modal = document.getElementById('suggestionModal');
+      const body = document.getElementById('modalBody');
+      const sections = buildSuggestionNarrative(card);
+
+      document.getElementById('modalTitle').textContent = card.title || 'Öneri Detayı';
+      document.getElementById('modalMeta').textContent = `${card.projectId || '-'}${card.serviceId ? ` / ${card.serviceId}` : ''} · taskType: ${card.taskType || '-'} · signal: ${card.signal || '-'}`;
+
+      const sectionRows = [
+        ['Sorun neydi?', sections.problem],
+        ['Neden bu ihtiyaç oluştu?', sections.reason],
+        ['Geliştirme ile neler yapılacak?', sections.implementation],
+        ['Beklenen sonuçlar', sections.expected],
+      ];
+
+      const confidence = Number.isFinite(Number(card?.confidence)) ? `${Number(card.confidence)}%` : 'n/a';
+      const checklist = card?.checklist || {};
+      const evidence = Array.isArray(card?.evidence) ? card.evidence : [];
+
+      const checklistHtml = `
+        <section class="modal-section">
+          <h4>Kontrol Checklist</h4>
+          <div>github: ${checklist.github ? '✅' : '❌'} · localRepo: ${checklist.localRepo ? '✅' : '❌'} · runtimeLogs: ${checklist.runtimeLogs ? '✅' : '❌'} · prd: ${checklist.prd ? '✅' : '❌'} · codebase: ${checklist.codebase ? '✅' : '❌'}</div>
+          <div style="margin-top:6px; color:#94a3b8;">confidence: ${escapeHtml(confidence)}</div>
+        </section>
+      `;
+
+      const evidenceHtml = `
+        <section class="modal-section">
+          <h4>Kanıtlar</h4>
+          <div>${evidence.length ? evidence.map((e) => `• ${escapeHtml(e)}`).join('<br/>') : 'Kanıt yok'}</div>
+        </section>
+      `;
+
+      body.innerHTML = sectionRows.map(([title, part]) => `
+    <section class="modal-section">
+      <h4>${title}${part.inferred ? '<span class="inferred">(çıkarım)</span>' : ''}</h4>
+      <div>${escapeHtml(part.text || '')}</div>
+    </section>
+  `).join('') + checklistHtml + evidenceHtml;
+
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function openWatcherModal(card) {
+      const meta = card.runtimeMeta || {};
+      const ls = card.liveStatus || {};
+      const metric = runMetric(card);
+      const modal = document.getElementById('suggestionModal');
+      const body = document.getElementById('modalBody');
+      document.getElementById('modalTitle').textContent = card.title || 'İzleyici Detayı';
+      document.getElementById('modalMeta').textContent = `${card.projectId || '-'}${card.serviceId ? ` / ${card.serviceId}` : ''} · status: ${card.status || '-'}`;
+      body.innerHTML = `
+    <section class="modal-section"><h4>Live Status</h4><div>currentStep: ${escapeHtml(ls.currentStep || 'idle')}</div><div>lastAction: ${escapeHtml(ls.lastAction || '-')}</div><div>lastOutcome: ${escapeHtml(ls.lastOutcome || '-')}</div><div>lastOutcomeAt: ${escapeHtml(ls.lastOutcomeAt || '-')}</div><div>cooldownRemaining: ${escapeHtml(formatRemaining(msRemaining(ls.cooldownUntil)))}</div></section>
+    <section class="modal-section"><h4>Son Run Özeti</h4><div>status/outcome: ${escapeHtml(metric.status)}</div><div>duration: ${escapeHtml(metric.duration)}</div><div>model: ${escapeHtml(metric.model)}</div><div>account/provider: ${escapeHtml(metric.account)} / ${escapeHtml(metric.provider)}</div><div>start: ${escapeHtml(metric.startedAtIso || 'unknown')}</div><div>end: ${escapeHtml(metric.endedAtIso || 'unknown')}</div></section>
+    <section class="modal-section"><h4>Oturum</h4><div>sessionKey: ${escapeHtml(meta.sessionKey || card.agentSessionKey || '-')}</div><div>sessionId: ${escapeHtml(meta.sessionId || card.sessionId || '-')}</div><div>source: ${escapeHtml(meta.source || '-')}</div></section>
+    <section class="modal-section"><h4>Runtime</h4><div>account: ${escapeHtml(meta.account || '-')}</div><div>model: ${escapeHtml(meta.model || '-')}</div><div>provider: ${escapeHtml(meta.provider || '-')}</div><div>updated: ${escapeHtml(meta.updatedAtIso || '-')}</div></section>
+    <section class="modal-section"><h4>Run Timeline (last 20)</h4><div style="font-family:monospace; font-size:10px; line-height:1.4;">${(card.runHistory || []).slice(0, 20).map(it => `
+      <details style="margin-bottom:4px; border-bottom:1px solid #1f2a3d; padding-bottom:4px;">
+        <summary style="cursor:pointer; color:#67e8f9;">
+          ${escapeHtml(it.startedAtIso ? new Date(it.startedAtIso).toLocaleString('tr-TR') : 'unknown')} · 
+          <span style="color:${it.status === 'success' ? '#4ade80' : '#f87171'}">${escapeHtml(it.status || 'unknown')}</span> · 
+          ${escapeHtml(it.durationLabel || '0s')}
+        </summary>
+        <div style="padding:6px; background:#0b1020; color:#94a3b8; margin-top:4px; white-space:pre-wrap; word-break:break-all; max-height:200px; overflow:auto;">
+          <strong>Model:</strong> ${escapeHtml(shortModelName(it.model))} (${escapeHtml(it.account)})<br/>
+          <strong>Output:</strong><br/>${escapeHtml(it.output || '(çıktı yok)')}
+        </div>
+      </details>
+    `).join('') || 'Geçmiş bulunamadı'}</div></section>
+    <section class="modal-section"><h4>Event Timeline (last 10)</h4><div>${(card.timeline || []).slice(0, 10).map(it => `${escapeHtml(new Date(it.ts).toLocaleString('tr-TR'))} · ${escapeHtml(it.status || 'event')} · ${escapeHtml(it.message || it.type || '-')}`).join('<br/>') || '-'}</div></section>
+  `;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeSuggestionModal() {
+      const modal = document.getElementById('suggestionModal');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function renderSubagentMetric(state) {
+      const metricEl = document.getElementById('subagentMetric');
+      const m = state?.subagents || {};
+      const total = Number(m.total || 0);
+      const running = Number(m.running || 0);
+      const idle = Number(m.idle || 0);
+      const cooldown = Number(m.cooldown || 0);
+      const unknown = Number(m.unknown || 0);
+      const chip = (step, label, count) => {
+        const active = watcherStepFilter === step;
+        return `<button class="btn secondary" data-step-filter="${step}" style="padding:2px 6px; font-size:11px; margin-right:4px; ${active ? 'border-color:#22d3ee;color:#67e8f9;' : ''}">${label}: ${count}</button>`;
+      };
+      metricEl.innerHTML = `
+    <div class="count" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <span>Sub-agents: ${total}</span>
+      <button class="btn secondary" data-step-filter="all" style="padding:2px 6px; font-size:11px;">Tümü</button>
+    </div>
+    <div class="meta" style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">
+      ${chip('running', 'running', running)}
+      ${chip('idle', 'idle', idle)}
+      ${chip('cooldown', 'cooldown', cooldown)}
+      ${chip('unknown', 'unknown', unknown)}
+    </div>
+  `;
+
+      metricEl.querySelectorAll('[data-step-filter]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const step = e.currentTarget.getAttribute('data-step-filter');
+          watcherStepFilter = step === 'all' ? null : step;
+          if (appState) render(appState);
+        });
+      });
+    }
+
+    function normalizeTextLite(s = '') {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
+    function normalizeUsageLabel(info = {}) {
+      const provider = String(info?.provider || '').toLowerCase();
+      let label = String(info?.label || 'unknown / unavailable');
+      label = label.replace(/\bDay\s*:/gi, 'Week:');
+
+      if (provider === 'google-antigravity') {
+        const values = [];
+        for (const m of label.matchAll(/(\d+(?:\.\d+)?)%\s*left/gi)) values.push(Number(m[1]));
+        if (values.length) {
+          const minVal = Math.min(...values);
+          const reset = (label.match(/resets?\s*([^·]+)/i) || [])[0] || '';
+          return `Hesap limiti: ${minVal}% kaldı${reset ? ` · ${reset}` : ''}`;
+        }
+        return 'Hesap limiti bilgisi alınamadı';
+      }
+
+      return label;
+    }
+
+    function renderProviderUsage(state) {
+      const el = document.getElementById('providerUsageTable');
+      const usageRows = Array.isArray(state?.providerUsage?.rows) ? state.providerUsage.rows : [];
+      const updatedAt = state?.providerUsage?.updatedAt ? new Date(state.providerUsage.updatedAt).toLocaleString('tr-TR') : 'n/a';
+
+      // Backend'den gelen aktif hesap bilgisi
+      const activeAccountLabel = state?.activeAccount || '';
+
+      const rows = usageRows
+        .map((info) => {
+          const accountLabel = info?.account || info?.owner || '';
+          const activeLower = normalizeTextLite(String(activeAccountLabel || ''));
+          const accountLower = normalizeTextLite(String(accountLabel || ''));
+          const usageLower = String(info?.label || '').toLowerCase();
+          const isMatch = activeLower && accountLower && (activeLower.includes(accountLower) || accountLower.includes(activeLower));
+          const isExhausted = usageLower.includes('0% left') || usageLower.includes('%0 kaldı') || usageLower.includes('limit bitti') || usageLower.includes('exhaust');
+
+          let style = '';
+          if (isExhausted) {
+            style = 'style="background-color: rgba(239, 68, 68, 0.15); color: #fca5a5; border-left: 3px solid #ef4444;"';
+          } else if (isMatch) {
+            style = 'style="background-color: rgba(34, 197, 94, 0.15); color: #4ade80; font-weight:bold; border-left: 3px solid #22c55e;"';
+          }
+
+          const nextRefresh = info?.nextRefresh ? new Date(info.nextRefresh).toLocaleString('tr-TR') : '-';
+
+          return `
+      <tr ${style}>
+        <td>${escapeHtml(accountLabel)}</td>
+        <td>${escapeHtml(info?.status || 'unknown')}</td>
+        <td>${escapeHtml(normalizeUsageLabel(info))}</td>
+        <td>${escapeHtml(nextRefresh)}</td>
+        <td>${escapeHtml(info?.source || '-')}</td>
+      </tr>
+    `;
+        })
+        .join('');
+
+      el.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+      <strong>Provider Kullanım Özeti</strong>
+    </div>
+    <div class="badge" style="margin-bottom:4px;">son güncelleme: ${escapeHtml(updatedAt)}</div>
+    <table>
+      <thead><tr><th>Hesap</th><th>Durum</th><th>Kalan Kullanım</th><th>Sonraki Yenileme</th><th>Kaynak</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="5">Henüz kullanım verisi yok</td></tr>'}</tbody>
+    </table>
+  `;
+    }
+
+    function render(state) {
+      appState = state;
+      renderProjects(state);
+      renderSubagentMetric(state);
+      renderProviderUsage(state);
+      document.getElementById('scope').textContent = selectedLabel();
+
+      const rawTotal = columns.reduce((acc, [key]) => acc + ((state.board?.[key] || []).length), 0);
+      const filteredByCol = Object.fromEntries(columns.map(([key]) => [key, (state.board?.[key] || []).filter(cardMatchesScope)]));
+      const filteredTotal = Object.values(filteredByCol).reduce((acc, arr) => acc + arr.length, 0);
+
+      if (rawTotal > 0 && filteredTotal === 0 && (selected.projectId || watcherStepFilter)) {
+        selected = { projectId: null, serviceId: null };
+        watcherStepFilter = null;
+        return render(state);
+      }
+
+      for (const [key] of columns) {
+        const zone = document.querySelector(`.dropzone[data-col="${key}"]`);
+        const cards = filteredByCol[key] || [];
+        document.getElementById(`count-${key}`).textContent = `(${cards.length})`;
+        zone.innerHTML = cards.map(c => {
+          const locked = key === 'izleyiciler';
+          const scopeLine = `${c.projectId || ''}${c.serviceId ? ` / ${c.serviceId}` : ''}`.trim();
+          return `
+      <article class="card ${locked ? 'locked' : ''} ${suggestionClass(c, key)}" draggable="${locked ? 'false' : 'true'}" data-id="${c.id}" data-locked="${locked ? '1' : '0'}" data-col="${key}">
+        <div><strong>${c.title}</strong></div>
+        ${scopeLine ? `<div class="badge">${scopeLine}</div>` : ''}
+        ${key !== 'izleyiciler' ? `<p>${c.details || ''}</p>` : ''}
+        ${(key === 'izleyiciler' || key === 'gelistiriliyor' || key === 'test') && key !== 'izleyiciler' ? runtimeBadge(c) : ''}
+        ${key === 'izleyiciler' ? watcherRunSummaryHtml(c) : ''}
+        ${key === 'izleyiciler' ? `<div style="margin-top:6px; display:flex; gap:6px;">
+          <button class="btn" data-trigger-watcher="${c.id}">Çalıştır</button>
+          <button class="btn secondary" data-watcher-details="${c.id}">Çalışma Geçmişi</button>
+        </div>` : ''}
+        ${key === 'oneriler' ? `<div class="badge">görülme: ${c.duplicateCount || 1}${c.lastSeenAt ? ` · son: ${new Date(c.lastSeenAt).toLocaleTimeString('tr-TR')}` : ''}${Number.isFinite(Number(c.confidence)) ? ` · confidence: ${Number(c.confidence)}%` : ''}</div>` : ''}
+        ${key === 'oneriler' ? `<div style="margin-top:6px"><button class="btn" data-approve="${c.id}">Onayla + Agent Başlat</button></div>` : ''}
+      </article>
+    `;
+        }).join('');
+      }
+
+      bindDnD();
+      bindApprovals();
+      bindSuggestionModal();
+    }
+
+    function bindApprovals() {
+      document.querySelectorAll('[data-approve]').forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          await fetch(`/api/v2/suggestions/${btn.dataset.approve}/approve`, { method: 'POST' });
+        };
+      });
+    }
+
+    function bindSuggestionModal() {
+      const suggestionCards = document.querySelectorAll('.card[data-col="oneriler"]');
+      suggestionCards.forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.id;
+          const card = (appState?.board?.oneriler || []).find(c => c.id === id);
+          if (card) openSuggestionModal(card);
+        });
+      });
+
+      document.querySelectorAll('[data-watcher-details]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.watcherDetails;
+          const card = (appState?.board?.izleyiciler || []).find(c => c.id === id);
+          if (card) openWatcherModal(card);
+        });
+      });
+
+      document.querySelectorAll('[data-trigger-watcher]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.triggerWatcher;
+          btn.disabled = true;
+          btn.textContent = 'Çalışıyor…';
+          try {
+            await fetch(`/api/v2/watchers/${id}/trigger`, { method: 'POST' });
+            setTimeout(() => resyncState(), 1000);
+          } catch (err) {
+            alert('İzleyici başlatılamadı: ' + (err?.message || err));
+            btn.disabled = false;
+            btn.textContent = 'Çalıştır';
+          }
+        });
+      });
+    }
+
+    function bindDnD() {
+      document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          if (card.dataset.locked === '1') {
+            e.preventDefault();
+            return;
+          }
+          e.dataTransfer.setData('text/plain', card.dataset.id);
+        });
+      });
+      document.querySelectorAll('.dropzone').forEach(zone => {
+        zone.addEventListener('dragover', (e) => e.preventDefault());
+        zone.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          const id = e.dataTransfer.getData('text/plain');
+          const to = zone.dataset.col;
+          if (!id || !to) return;
+          const card = document.querySelector(`.card[data-id="${id}"]`);
+          if (card?.dataset.locked === '1' && to !== 'izleyiciler') return;
+          await fetch(`/api/v2/cards/${id}/move`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to })
+          });
+        });
+      });
+    }
+
+    createColumns();
+
+    let sse = null;
+    let reconnectTimer = null;
+    let lagTimer = null;
+    let lastStreamBeatAt = 0;
+    const STREAM_LAG_MS = 12000;
+    const RECONNECT_DELAY_MS = 1500;
+
+    async function resyncState() {
+      const data = await fetch('/api/v2/state').then(r => r.json());
+      render(data);
+    }
+
+    function markStreamBeat() {
+      lastStreamBeatAt = Date.now();
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connectStream();
+      }, RECONNECT_DELAY_MS);
+    }
+
+    function connectStream() {
+      try { sse?.close(); } catch { }
+      sse = new EventSource('/api/stream');
+      sse.addEventListener('open', () => {
+        markStreamBeat();
+        resyncState().catch(() => { });
+      });
+      sse.addEventListener('state', e => {
+        markStreamBeat();
+        try { render(JSON.parse(e.data)); } catch { }
+      });
+      sse.addEventListener('heartbeat', () => {
+        markStreamBeat();
+      });
+      sse.onerror = () => {
+        scheduleReconnect();
+      };
+    }
+
+    lagTimer = setInterval(() => {
+      if (!lastStreamBeatAt) return;
+      if (Date.now() - lastStreamBeatAt > STREAM_LAG_MS) {
+        resyncState().catch(() => { });
+        scheduleReconnect();
+        markStreamBeat();
+      }
+    }, 2000);
+
+    resyncState().catch(() => { });
+    connectStream();
+
+    document.getElementById('modalCloseBtn').addEventListener('click', closeSuggestionModal);
+    document.getElementById('suggestionModal').addEventListener('click', (e) => {
+      if (e.target.id === 'suggestionModal') closeSuggestionModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSuggestionModal();
+    });
+  </script>
+</body>
+
+</html>

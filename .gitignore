@@ -1,0 +1,79 @@
+# Zeus Monorepo - Hyper Defensive .gitignore
+
+# 1. Block everything by default (optional, but let's be strategic instead)
+# Instead of blocking everything, we'll block all potential secret locations.
+
+# Node.js
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+pnpm-lock.yaml
+package-lock.json
+bun.lock
+bun.lockb
+.pnpm-store/
+.tsbuildinfo
+
+# 2. SECRETS & CONFIG (The Big Block)
+.env
+**/.env
+credentials/
+**/credentials/
+identity/
+**/identity/
+agents/
+**/agents/
+openclaw.json
+**/openclaw.json
+auth-profiles.json
+**/auth-profiles.json
+*.pem
+*.key
+*.pfx
+*.cert
+*.p12
+
+# 3. BACKUPS & TEMPS
+*.bak
+*.bak.*
+*.tmp
+*.temp
+**/openclaw.json.bak*
+backups/
+temp/
+
+# 4. STATE & LOGS
+logs/
+**/logs/
+update-state/
+delivery-queue/
+cron/runs/
+*.log
+*.jsonl
+update-check.json
+exec-approvals.json
+
+# 5. OS / IDE
+.DS_Store
+**/.DS_Store
+.idea/
+.vscode/
+.gemini/
+.claude/
+.serena/
+.git/
+
+# 6. Build Artifacts
+**/build/
+**/.build/
+**/.gradle/
+**/Package.resolved
+apps/macos/.swiftpm/
+apps/ios/.derivedData/
+
+# 7. Media
+media/inbound/
+media/outbound/
+**/media/inbound/
+**/media/outbound/
