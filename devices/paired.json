@@ -13,7 +13,8 @@
       "operator.admin",
       "operator.approvals",
       "operator.pairing",
-      "operator.read"
+      "operator.read",
+      "operator.write"
     ],
     "tokens": {
       "operator": {

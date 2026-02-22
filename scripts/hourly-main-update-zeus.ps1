@@ -2,7 +2,7 @@
 Write-Host "=== Hourly OpenClaw Update Check ==="
 
 # Navigate to OpenClaw directory
-Set-Location "$HOME\.openclaw"
+Set-Location "C:\Users\deniz\OneDrive\Code\Zeus"
 
 # Run beta update
 Write-Host "`n[1/2] Running beta update..."

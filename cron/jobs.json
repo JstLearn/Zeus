@@ -7,7 +7,7 @@
       "name": "hourly-openclaw-update",
       "enabled": true,
       "createdAtMs": 1770817808155,
-      "updatedAtMs": 1771768894922,
+      "updatedAtMs": 1771779622509,
       "schedule": {
         "kind": "cron",
         "expr": "0 * * * *",
@@ -27,12 +27,45 @@
         "to": "784562495"
       },
       "state": {
-        "nextRunAtMs": 1771772400000,
-        "lastRunAtMs": 1771768800039,
+        "nextRunAtMs": 1771783200000,
+        "lastRunAtMs": 1771779600044,
         "lastStatus": "ok",
-        "lastDurationMs": 94883,
+        "lastDurationMs": 22465,
         "consecutiveErrors": 0,
         "lastDelivered": false
+      }
+    },
+    {
+      "id": "7086e758-70d2-4271-90bc-3f3c0a63cf89",
+      "agentId": "main",
+      "sessionKey": "agent:main:main",
+      "name": "Hourly self-update (git pull autostash)",
+      "enabled": true,
+      "createdAtMs": 1771776218127,
+      "updatedAtMs": 1771779926129,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 * * * *",
+        "tz": "Europe/Istanbul",
+        "staggerMs": 300000
+      },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Run an hourly self-update check for the OpenClaw workspace. Execute:\n\ngit -C \"C:/Users/deniz/OneDrive/Code/Zeus/workspace\" pull --rebase --autostash origin main\n\nThen execute:\n\ngit -C \"C:/Users/deniz/OneDrive/Code/Zeus/workspace\" status --porcelain=v1 -b\n\nIf pull succeeds, send a very short success summary with branch status. If it fails, include exact stderr and likely cause in one concise message.",
+        "timeoutSeconds": 180
+      },
+      "delivery": {
+        "mode": "announce"
+      },
+      "state": {
+        "nextRunAtMs": 1771783497337,
+        "lastRunAtMs": 1771779897366,
+        "lastStatus": "ok",
+        "lastDurationMs": 28763,
+        "lastDelivered": true,
+        "consecutiveErrors": 0
       }
     }
   ]

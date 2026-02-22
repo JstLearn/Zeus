@@ -2,8 +2,8 @@
 
 $ErrorActionPreference = "Continue" # Do not stop on native commands globally so we can check $LASTEXITCODE
 
-$workspace = "C:\Users\deniz\.openclaw\workspace"
-$stateDir = "C:\Users\deniz\.openclaw\update-state"
+$workspace = "C:\Users\deniz\OneDrive\Code\Zeus\workspace"
+$stateDir = "C:\Users\deniz\OneDrive\Code\Zeus\update-state"
 $stateFile = "$stateDir\last-update-machine.txt"
 
 if (!(Test-Path $stateDir)) {
