@@ -33,7 +33,7 @@
         "lastDurationMs": 31,
         "consecutiveErrors": 1,
         "lastDelivered": false,
-        "lastError": "Error: EACCES: permission denied, mkdir '/app/C:\\Users\\deniz\\.openclaw\\workspace'"
+        "runningAtMs": 1771766873168
       }
     }
   ]

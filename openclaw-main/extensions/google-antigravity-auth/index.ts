@@ -1,5 +1,5 @@
-import { createHash, randomBytes } from "node:crypto";
-import { createServer } from "node:http";
+import { createHash, randomBytes } from "crypto";
+import { createServer } from "http";
 import {
   buildOauthProviderAuthResult,
   emptyPluginConfigSchema,
