@@ -67,6 +67,17 @@ describe("session path safety", () => {
       ),
     ).toThrow(/within sessions directory/);
   });
+
+  it("heals concatenated absolute paths by extracting the internal relative part", () => {
+    const sessionsDir = "C:\\Users\\deniz\\OneDrive\\Code\\Zeus\\agents\\main\\sessions";
+    // This simulates the malformed path from the user's sessions.json
+    const malformed = "C:\\home\\node\\.openclaw\\agents\\main\\sessions\\C:\\Users\\deniz\\OneDrive\\Code\\Zeus\\agents\\main\\sessions\\4fdf622c-3ec6-4c2f-bce6-30729a6c901c.jsonl";
+
+    const resolved = resolveSessionFilePath("4fdf622c-3ec6-4c2f-bce6-30729a6c901c", { sessionFile: malformed }, { sessionsDir });
+
+    // It should extract the part after the last 'sessions' and join it with current sessionsDir
+    expect(resolved).toBe(path.resolve(sessionsDir, "4fdf622c-3ec6-4c2f-bce6-30729a6c901c.jsonl"));
+  });
 });
 
 describe("resolveSessionResetPolicy", () => {

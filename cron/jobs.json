@@ -7,7 +7,7 @@
       "name": "hourly-openclaw-update",
       "enabled": true,
       "createdAtMs": 1770817808155,
-      "updatedAtMs": 1771758000215,
+      "updatedAtMs": 1771768894922,
       "schedule": {
         "kind": "cron",
         "expr": "0 * * * *",
@@ -18,7 +18,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "agentTurn",
-        "message": "Run exactly and only this command first:\npwsh -NoProfile -File C:\\Users\\deniz\\.openclaw\\workspace\\scripts\\hourly-main-update.ps1\n\nThen read and parse only this file:\nC:\\Users\\deniz\\.openclaw\\update-state\\last-update-machine.txt\n\nParse machine lines exactly:\nRESULT=<UPDATED|OK|FAILED>\nRUN_AT_UTC=<iso>\nRUN_AT_LOCAL=<iso>\nBEHIND_BEFORE=<n>\nBEHIND_AFTER=<n>\nREASON=<text>\n\nValidation rules (strict):\n- If file missing or any required machine line missing: rerun command ONCE and parse again.\n- If still missing: send exactly one failure message:\n⚠️ Güncelleme sonucu doğrulanamadı.\n• Neden: Komut çıktısı okunamadı.\n- If RESULT=OK but BEHIND_BEFORE>0 or BEHIND_AFTER>0: treat as FAILED (inconsistent result).\n- Never use fallback JSON or previous runs.\n\nAlso read bullets under \"- Öne çıkan değişiklikler:\" (lines starting with \"  - \") when available.\nConvert each bullet into a short, fully Turkish, single-sentence user-facing summary.\n\nSend exactly ONE Telegram message to 784562495 using these templates:\n1) RESULT=UPDATED and BEHIND_BEFORE>0:\n✅ Güncelleme tamamlandı.\n• Toplam değişiklik: <BEHIND_BEFORE>\n• Yeni gelenler:\n• <tamamen Türkçe, tek cümlelik özet>\n• <tamamen Türkçe, tek cümlelik özet>\n\n2) RESULT=OK and BEHIND_BEFORE=0 and BEHIND_AFTER=0:\n✅ Zaten güncel, yeni geliştirme yok.\n\n3) RESULT=FAILED:\n⚠️ Güncelleme başarısız.\n• Neden: <REASON>\n\nHard rules:\n- One message only.\n- Sadece Türkçe yaz.\n- İngilizce başlık/hash/divergence yazma.\n- Maddeler kısa, net ve tek cümle olsun.\n- Kullanıcıya \"mesaj gönderildi\" / teslim teyidi / ek açıklama gönderme.\n- Final output exactly NO_REPLY.",
+        "message": "Run exactly and only this command first:\npwsh -NoProfile -File C:\\Users\\deniz\\OneDrive\\Code\\Zeus\\workspace\\scripts\\hourly-main-update.ps1\n\nThen read and parse only this file:\nC:\\Users\\deniz\\OneDrive\\Code\\Zeus\\update-state\\last-update-machine.txt\n\nParse machine lines exactly:\nRESULT=<UPDATED|OK|FAILED>\nRUN_AT_UTC=<iso>\nRUN_AT_LOCAL=<iso>\nBEHIND_BEFORE=<n>\nBEHIND_AFTER=<n>\nREASON=<text>\n\nValidation rules (strict):\n- If file missing or any required machine line missing: rerun command ONCE and parse again.\n- If still missing: send exactly one failure message:\n⚠️ Güncelleme sonucu doğrulanamadı.\n• Neden: Komut çıktısı okunamadı.\n- If RESULT=OK but BEHIND_BEFORE>0 or BEHIND_AFTER>0: treat as FAILED (inconsistent result).\n- Never use fallback JSON or previous runs.\n\nAlso read bullets under \"- Öne çıkan değişiklikler:\" (lines starting with \"  - \") when available.\nConvert each bullet into a short, fully Turkish, single-sentence user-facing summary.\n\nSend exactly ONE Telegram message to 784562495 using these templates:\n1) RESULT=UPDATED and BEHIND_BEFORE>0:\n✅ Güncelleme tamamlandı.\n• Toplam değişiklik: <BEHIND_BEFORE>\n• Yeni gelenler:\n• <tamamen Türkçe, tek cümlelik özet>\n• <tamamen Türkçe, tek cümlelik özet>\n\n2) RESULT=OK and BEHIND_BEFORE=0 and BEHIND_AFTER=0:\n✅ Zaten güncel, yeni geliştirme yok.\n\n3) RESULT=FAILED:\n⚠️ Güncelleme başarısız.\n• Neden: <REASON>\n\nHard rules:\n- One message only.\n- Sadece Türkçe yaz.\n- İngilizce başlık/hash/divergence yazma.\n- Maddeler kısa, net ve tek cümle olsun.\n- Kullanıcıya \"mesaj gönderildi\" / teslim teyidi / ek açıklama gönderme.\n- Final output exactly NO_REPLY.",
         "timeoutSeconds": 1800
       },
       "delivery": {
@@ -27,13 +27,12 @@
         "to": "784562495"
       },
       "state": {
-        "nextRunAtMs": 1771761600000,
-        "lastRunAtMs": 1771758000184,
-        "lastStatus": "error",
-        "lastDurationMs": 31,
-        "consecutiveErrors": 1,
-        "lastDelivered": false,
-        "runningAtMs": 1771766873168
+        "nextRunAtMs": 1771772400000,
+        "lastRunAtMs": 1771768800039,
+        "lastStatus": "ok",
+        "lastDurationMs": 94883,
+        "consecutiveErrors": 0,
+        "lastDelivered": false
       }
     }
   ]

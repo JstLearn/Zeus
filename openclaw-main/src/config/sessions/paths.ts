@@ -101,9 +101,12 @@ function resolveSiblingAgentSessionsDir(
   return path.join(rootDir, "agents", normalizeAgentId(agentId), "sessions");
 }
 
+function isAbsolutePlatformAgnostic(p: string): boolean {
+  return path.isAbsolute(p) || /^[a-z]:/i.test(p) || p.startsWith("\\\\");
+}
+
 function extractAgentIdFromAbsoluteSessionPath(candidateAbsPath: string): string | undefined {
-  const normalized = path.normalize(path.resolve(candidateAbsPath));
-  const parts = normalized.split(path.sep).filter(Boolean);
+  const parts = candidateAbsPath.split(/[\\/]/).filter(Boolean);
   const sessionsIndex = parts.lastIndexOf("sessions");
   if (sessionsIndex < 2 || parts[sessionsIndex - 2] !== "agents") {
     return undefined;
@@ -122,11 +125,27 @@ function resolvePathWithinSessionsDir(
     throw new Error("Session file path must not be empty");
   }
   const resolvedBase = path.resolve(sessionsDir);
-  // Normalize absolute paths that are within the sessions directory.
+  const isAbs = isAbsolutePlatformAgnostic(trimmed);
+
+  // Normalize absolute paths.
   // Older versions stored absolute sessionFile paths in sessions.json;
   // convert them to relative so the containment check passes.
-  const normalized = path.isAbsolute(trimmed) ? path.relative(resolvedBase, trimmed) : trimmed;
-  if (normalized.startsWith("..") && path.isAbsolute(trimmed)) {
+  // If the path is absolute on a DIFFERENT platform (e.g. Windows path on Linux),
+  // path.relative(resolvedBase, trimmed) might return 'trimmed' itself because
+  // they share no common prefix (and path.isAbsolute(trimmed) might be false).
+  let normalized: string;
+  if (isAbs) {
+    if (path.isAbsolute(trimmed)) {
+      normalized = path.relative(resolvedBase, trimmed);
+    } else {
+      // It's absolute on another platform. Treat it as escaped so we hit the target fallback.
+      normalized = "..[platform-mismatch].." + trimmed;
+    }
+  } else {
+    normalized = trimmed;
+  }
+
+  if (normalized.startsWith("..") && isAbs) {
     const tryAgentFallback = (agentId: string): string | undefined => {
       const normalizedAgentId = normalizeAgentId(agentId);
       const siblingSessionsDir = resolveSiblingAgentSessionsDir(resolvedBase, normalizedAgentId);
@@ -156,7 +175,20 @@ function resolvePathWithinSessionsDir(
       // Accept it even if the root directory differs from the current env
       // (e.g., OPENCLAW_STATE_DIR changed between session creation and resolution).
       // The structural pattern provides sufficient containment guarantees.
-      return path.resolve(trimmed);
+
+      // Healing: If the path is absolute on another platform but structurally matches,
+      // it might be concatenated (e.g. C:\home\node\...\C:\Users\...).
+      // We extract the internal relative part and re-base it against our current resolvedBase.
+      const parts = trimmed.split(/[\\/]/).filter(Boolean);
+      const sessionsIndex = parts.lastIndexOf("sessions");
+      if (sessionsIndex >= 0 && sessionsIndex < parts.length - 1) {
+        const relativePart = parts.slice(sessionsIndex + 1).join(path.sep);
+        return path.resolve(resolvedBase, relativePart);
+      }
+
+      // Fallback: We return trimmed as-is only if we can't extract a relative part.
+      // This is a last resort and might still lead to mkdir errors if malformed.
+      return trimmed;
     }
   }
   if (!normalized || normalized.startsWith("..") || path.isAbsolute(normalized)) {
